@@ -34,16 +34,32 @@ links = container.find("a")
 for link in links:
     title = link.find(".title", first = True)
     link = link.absolute_links
+
 # if a title exists and the link doesn't contain /tag/ string, convert the link from a set to a string using a .join method
-# and add the title-link pair to the articles dictionary
-    if title != None:
-        if "/tag/" not in link:
-            linkStr = "".join(link)
-            print(linkStr)
-            print(title.text)
-            articles[linkStr] = title.text
+# and add the title-link pair to the articles dictionary. So at this point, the dictionary is filled with current articles,
+# which will be useful for checking if there are new ones
+    if title != None and "/tag/" not in link:
+        linkStr = "".join(link)            
+        articles[linkStr] = title.text
+
+# need to add a normal way of stopping the program. Maybe via e-mail so it can be stopped remotely?
+# while True loop that checks every 10 seconds to see if any new articles are published. If there are, send them via e-mail
 for k, v in articles.items():
-    print(k,v)    
+    print(k + "\n" + v)
+
+while True:
+        container = response.html.find(".main-category-holder", first = True)
+        links = container.find("a")
+        for link in links:
+            title = link.find(".title", first = True)
+            link = link.absolute_links
+            if title != None and "/tag/" not in link:
+                linkStr = "".join(link)
+
+                if linkStr not in articles.keys():
+                    print(linkStr + "\n" + title.text)
+        time.sleep(10)       
+                
 
 
 
