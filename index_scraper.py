@@ -41,34 +41,39 @@ def main():
     session = HTMLSession()
     response = session.get(url, headers=headers)
 
-    # returns the first container with the css class of main-category-holder and another with the tab-content-latest-vijesti
-    container = response.html.find(".main-category-holder", first=True)
-    container2 = response.html.find("#tab-content-latest-vijesti", first=True)
+    # returns the container with the class .main-category-holder depending on the index - 0 for news, 1 for sports and 2 for lifestyle
+    for i in [0]: 
+        container = response.html.find(".main-category-holder")[i]
+        # finds the 'a' element and finds the title and link within them, rejecting any link that has /tag/ inside
+        links = container.find("a")
+        for link in links:
+            title = link.find(".title", first=True)
+            link = link.absolute_links
+            if title != None and "/tag/" not in link:
+                linkStr = "".join(link)
+                # after that, link and title are added to the articles dictionary
+                articles[linkStr] = title.text
 
-    # find all 'a' elements inside
-    links = container.find("a")
-    # find classes vijesti-text-hover
-    links2 = container2.find(".vijesti-text-hover")
-
-    # for each of the 'a' elements (since the find method returns a list) check the title and save it to a title variable, and find
-    # the exact link
-    for link in links:
-        title = link.find(".title", first=True)
-        link = link.absolute_links
-
-    # if a title exists and the link doesn't contain /tag/ string, convert the link from a set to a string using a .join method
-    # and add the title-link pair to the articles dictionary. So at this point, the dictionary is filled with current articles,
-    # which will be useful for checking if there are new ones
-        if title != None and "/tag/" not in link:
+    # same as above but for the side menu, so it's a bit different since the targeting 
+    # is with the class and id, and the text is between the <a> tags.
+    for i in [0]: #0 for news, 1 for sports and 2 for lifestyle
+        if i == 0:
+            artId = "#tab-content-latest-vijesti"
+            artClass = ".vijesti-text-hover"
+        elif i == 1:
+            artId == "#tab-content-latest-sport"
+            artClass = ".sport-text-hover"
+        else:
+            artId == "#tab-content-latest-magazin"
+            artClass = ".magazin-text-hover"
+            
+        container = response.html.find(artId, first=True)
+        links = container.find(artClass)
+        for link in links:
+            title = link.text
+            link = link.absolute_links
             linkStr = "".join(link)
-            articles[linkStr] = title.text
-
-    # this is for the 'najnovije' section, found in container2
-    for link in links2:
-        title = link.text
-        link = link.absolute_links
-        linkStr = "".join(link)
-        articles[linkStr] = title
+            articles[linkStr] = title # doesn't have the .text method as above since it already is a string type
 
     for k, v in articles.items():
         print(k + "\n" + v)
@@ -79,48 +84,42 @@ def main():
         # go through all the articles again, check if there are new ones. If there are, add them to the dictionary and send them via email.
         # sleep for 30 seconds, then do it all over again
         response = session.get(url, headers=headers)
-        container = response.html.find(".main-category-holder", first=True)
-        links = container.find("a")
-        for link in links:
-            title = link.find(".title", first=True)
-            link = link.absolute_links
-            if title != None and "/tag/" not in link:
+        for category in [0]: 
+            container = response.html.find(".main-category-holder")[category]
+            links = container.find("a")
+            for link in links:
+                title = link.find(".title", first=True)
+                link = link.absolute_links
+                if title != None and "/tag/" not in link:
+                    linkStr = "".join(link)
+                    if linkStr not in articles.keys():
+                        articles[linkStr] = title.text
+                        sendEmail(index, title.text, linkStr)
+                    index += 1
+                    
+        # checks the side container
+        for category in [0]: # 0 for the news, 1 for sports and 2 for lifestyle
+            if category == 0:
+                artId = "#tab-content-latest-vijesti"
+                artClass = ".vijesti-text-hover"
+            elif category == 1:
+                artId == "#tab-content-latest-sport"
+                artClass = ".sport-text-hover"
+            else:
+                artId == "#tab-content-latest-magazin"
+                artClass = ".magazin-text-hover"
+                
+            container = response.html.find(artId, first=True)
+            links = container.find(artClass)
+            for link in links:
+                title = link.text
+                link = link.absolute_links
                 linkStr = "".join(link)
                 if linkStr not in articles.keys():
-                    timestamp = datetime.datetime.now()
-                    dateTime = timestamp.strftime("%x %X")
-                    message = "Subject: No. " + \
-                        str(index) + ": " + title.text[:70] + "\n\n" + \
-                        dateTime + "\n" + title.text + "\n" + linkStr
-                    print(message)
-                    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-                        server.login("botzaindex@gmail.com", password)
-                        server.sendmail(
-                            sender_email, receiver_email, message.encode("utf8"))
+                    articles[linkStr] = title
+                    sendEmail(index, title, linkStr)
                     index += 1
-                    articles[linkStr] = title.text
-
-        # checks the other container
-        container2 = response.html.find(
-            "#tab-content-latest-vijesti", first=True)
-        links2 = container2.find(".vijesti-text-hover")
-        for link in links2:
-            title = link.text
-            link = link.absolute_links
-            linkStr = "".join(link)
-            if linkStr not in articles.keys():
-                timestamp = datetime.datetime.now()
-                dateTime = timestamp.strftime("%x %X")
-                message = "Subject: No. " + \
-                    str(index) + ": " + title.text[:70] + "\n\n" + \
-                    dateTime + "\n" + title.text + "\n" + linkStr
-                print(message)
-                with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-                    server.login("botzaindex@gmail.com", password)
-                    server.sendmail(sender_email, receiver_email,
-                                    message.encode("utf8"))
-                index += 1
-                articles[linkStr] = title.text
+                    
 
         # add the ability to stop the program remotely via email containing the word stop
         with Imbox('imap.gmail.com',
