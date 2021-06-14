@@ -2,13 +2,14 @@ import time
 import datetime
 from requests_html import HTMLSession
 import smtplib, ssl
+from imbox import Imbox
 
 session = HTMLSession()
 
 port = 465  # For SSL
 
 # e-mail info for the bot - need to hide the password eventually, this is just for the testing purposes
-password = "botzaindex123"
+password = "indexbot123"
 sender_email = "botzaindex@gmail.com"
 receiver_email = "matijanjic@gmail.com"
 
@@ -19,9 +20,10 @@ context = ssl.create_default_context()
 # empty dictionary that will hold the article links and titles
 articles = {}
 
+headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'}
 # main url of the web to scrape
 url = 'https://www.index.hr'
-response = session.get(url)
+response = session.get(url, headers = headers)
 
 # returns the first container with the css class of main-category-holder
 container = response.html.find(".main-category-holder", first = True)
@@ -42,18 +44,20 @@ for link in links:
         linkStr = "".join(link)            
         articles[linkStr] = title.text
 
-# need to add a normal way of stopping the program. Maybe via e-mail so it can be stopped remotely?
+
 
 
 for k, v in articles.items():
     print(k + "\n" + v)
 
+# need to add a normal way of stopping the program. Maybe via e-mail so it can be stopped remotely?
 
 # while True loop that checks every 10 seconds to see if any new articles are published. If there are, send them via e-mail
 index = 0
-
 while True:
-        response = session.get(url)
+    # go through all the articles again, check if there are new ones. If there are, add them to the dictionary and send them via email.
+    # sleep for 30 seconds, then do it all over again
+        response = session.get(url, headers = headers)
         container = response.html.find(".main-category-holder", first = True)
         links = container.find("a")
         for link in links:
@@ -64,13 +68,25 @@ while True:
                 if linkStr not in articles.keys():
                     timestamp = datetime.datetime.now()            
                     dateTime = timestamp.strftime("%x %X")
-                    message = "Subject: No. " + str(index) + ": " + title.text[:20] + "\n\n" + dateTime + "\n" + title.text + "\n" + linkStr
+                    message = "Subject: No. " + str(index) + ": " + title.text[:70] + "\n\n" + dateTime + "\n" + title.text + "\n" + linkStr
                     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
                         server.login("botzaindex@gmail.com", password)
                         server.sendmail(sender_email, receiver_email, message.encode("utf8"))
                     index += 1
                     articles[linkStr] = title.text
                     print(linkStr + "\n" + title.text)
+        with Imbox('imap.gmail.com',
+        username='botzaindex@gmail.com',
+        password = password,
+        ssl=True,
+        ssl_context=None,
+        starttls=False) as imbox:
+
+            messages = imbox.messages(unread=True, sent_from='matijanjic@gmail.com')
+            for uid, message in messages:
+                
+                if 'STOP' in str(message.body['plain']):
+                    exit()
         time.sleep(30)       
                 
 
