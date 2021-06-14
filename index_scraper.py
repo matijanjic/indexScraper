@@ -82,11 +82,13 @@ while True:
         ssl_context=None,
         starttls=False) as imbox:
 
-            messages = imbox.messages(unread=True, sent_from='matijanjic@gmail.com')
+            messages = imbox.messages(unread = True, sent_from = receiver_email)
             for uid, message in messages:
                 
-                if 'STOP' in str(message.body['plain']):
+                if 'STOP' in str(message.body['plain']).upper():
+                    imbox.mark_seen(uid)
                     exit()
+                    
         time.sleep(30)       
                 
 
