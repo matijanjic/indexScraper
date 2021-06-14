@@ -28,14 +28,19 @@ response = session.get(url, headers = headers)
 # returns the first container with the css class of main-category-holder
 container = response.html.find(".main-category-holder", first = True)
 
+container2 = response.html.find("#tab-content-latest-vijesti", first = True)
+
 # find all 'a' elements inside
 links = container.find("a")
+links2 = container2.find(".vijesti-text-hover")
 
 # for each of the 'a' elements (since the find method returns a list) check the title and save it to a title variable, and find
 # the exact link
 for link in links:
     title = link.find(".title", first = True)
     link = link.absolute_links
+
+
 
 # if a title exists and the link doesn't contain /tag/ string, convert the link from a set to a string using a .join method
 # and add the title-link pair to the articles dictionary. So at this point, the dictionary is filled with current articles,
@@ -44,13 +49,14 @@ for link in links:
         linkStr = "".join(link)            
         articles[linkStr] = title.text
 
-
-
+for link in links2:
+    title = link.text
+    link = link.absolute_links
+    linkStr = "".join(link)            
+    articles[linkStr] = title
 
 for k, v in articles.items():
     print(k + "\n" + v)
-
-# need to add a normal way of stopping the program. Maybe via e-mail so it can be stopped remotely?
 
 # while True loop that checks every 10 seconds to see if any new articles are published. If there are, send them via e-mail
 index = 0
@@ -69,12 +75,14 @@ while True:
                     timestamp = datetime.datetime.now()            
                     dateTime = timestamp.strftime("%x %X")
                     message = "Subject: No. " + str(index) + ": " + title.text[:70] + "\n\n" + dateTime + "\n" + title.text + "\n" + linkStr
+                    print(message)
                     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
                         server.login("botzaindex@gmail.com", password)
                         server.sendmail(sender_email, receiver_email, message.encode("utf8"))
                     index += 1
                     articles[linkStr] = title.text
-                    print(linkStr + "\n" + title.text)
+        
+        # add the ability to stop the program remotely via email containing the word stop
         with Imbox('imap.gmail.com',
         username='botzaindex@gmail.com',
         password = password,
