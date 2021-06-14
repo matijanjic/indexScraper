@@ -87,20 +87,11 @@ def main():
             if title != None and "/tag/" not in link:
                 linkStr = "".join(link)
                 if linkStr not in articles.keys():
-                    timestamp = datetime.datetime.now()
-                    dateTime = timestamp.strftime("%x %X")
-                    message = "Subject: No. " + \
-                        str(index) + ": " + title.text[:70] + "\n\n" + \
-                        dateTime + "\n" + title.text + "\n" + linkStr
-                    print(message)
-                    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-                        server.login("botzaindex@gmail.com", password)
-                        server.sendmail(
-                            sender_email, receiver_email, message.encode("utf8"))
+                    sendEmail(index, title.text, linkStr)
                     index += 1
                     articles[linkStr] = title.text
 
-        # checks the other container
+        # checks the other container for new articles
         container2 = response.html.find(
             "#tab-content-latest-vijesti", first=True)
         links2 = container2.find(".vijesti-text-hover")
@@ -109,20 +100,11 @@ def main():
             link = link.absolute_links
             linkStr = "".join(link)
             if linkStr not in articles.keys():
-                timestamp = datetime.datetime.now()
-                dateTime = timestamp.strftime("%x %X")
-                message = "Subject: No. " + \
-                    str(index) + ": " + title.text[:70] + "\n\n" + \
-                    dateTime + "\n" + title.text + "\n" + linkStr
-                print(message)
-                with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-                    server.login("botzaindex@gmail.com", password)
-                    server.sendmail(sender_email, receiver_email,
-                                    message.encode("utf8"))
+                sendEmail(index, title, linkStr)
                 index += 1
-                articles[linkStr] = title.text
+                articles[linkStr] = title
 
-        # add the ability to stop the program remotely via email containing the word stop
+        # add the option to stop the program remotely via email containing the word stop
         with Imbox('imap.gmail.com',
                    username='botzaindex@gmail.com',
                    password=password,
