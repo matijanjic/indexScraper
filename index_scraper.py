@@ -43,11 +43,17 @@ for link in links:
         articles[linkStr] = title.text
 
 # need to add a normal way of stopping the program. Maybe via e-mail so it can be stopped remotely?
-# while True loop that checks every 10 seconds to see if any new articles are published. If there are, send them via e-mail
+
+
 for k, v in articles.items():
     print(k + "\n" + v)
 
+
+# while True loop that checks every 10 seconds to see if any new articles are published. If there are, send them via e-mail
+index = 0
+
 while True:
+        response = session.get(url)
         container = response.html.find(".main-category-holder", first = True)
         links = container.find("a")
         for link in links:
@@ -55,10 +61,17 @@ while True:
             link = link.absolute_links
             if title != None and "/tag/" not in link:
                 linkStr = "".join(link)
-
                 if linkStr not in articles.keys():
+                    timestamp = datetime.datetime.now()            
+                    dateTime = timestamp.strftime("%x %X")
+                    message = "Subject: No. " + str(index) + ": " + title.text[:20] + "\n\n" + dateTime + "\n" + title.text + "\n" + linkStr
+                    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+                        server.login("botzaindex@gmail.com", password)
+                        server.sendmail(sender_email, receiver_email, message.encode("utf8"))
+                    index += 1
+                    articles[linkStr] = title.text
                     print(linkStr + "\n" + title.text)
-        time.sleep(10)       
+        time.sleep(30)       
                 
 
 
