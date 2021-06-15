@@ -4,6 +4,7 @@ from requests_html import HTMLSession
 import smtplib
 import ssl
 from imbox import Imbox
+import re
 
 # e-mail info for the bot - need to hide the password eventually, this is just for the testing purposes
 password = "indexbot123"
@@ -33,7 +34,7 @@ def main():
 
     # empty dictionary that will hold the article links(k) and titles(v)
     articles = {}
-    
+
     # select the categories on the Index.hr page - 0 is news, 1 is sports and 2 is lifestyle
     categories = [0]
     headers = {
@@ -53,6 +54,9 @@ def main():
             link = link.absolute_links
             if title != None and "/tag/" not in link:
                 linkStr = "".join(link)
+                pattern = '_\w\w\w=\d{6}'
+                replace = ''
+                linkStr = re.sub(pattern, replace, linkStr)
                 # after that, link and title are added to the articles dictionary
                 articles[linkStr] = title.text
 
@@ -75,6 +79,9 @@ def main():
             title = link.text
             link = link.absolute_links
             linkStr = "".join(link)
+            pattern = '_\w\w\w=\d{6}'
+            replace = ''
+            linkStr = re.sub(pattern, replace, linkStr)
             # doesn't have the .text method as above since it already is a string type
             articles[linkStr] = title
 
@@ -95,10 +102,13 @@ def main():
                 link = link.absolute_links
                 if title != None and "/tag/" not in link:
                     linkStr = "".join(link)
+                    pattern = '_\w\w\w=\d{6}'
+                    replace = ''
+                    linkStr = re.sub(pattern, replace, linkStr)
                     if linkStr not in articles.keys():
                         articles[linkStr] = title.text
                         sendEmail(index, title.text, linkStr)
-                    index += 1
+                        index += 1
 
         # checks the side container
         for category in categories:  # 0 for the news, 1 for sports and 2 for lifestyle
@@ -118,6 +128,9 @@ def main():
                 title = link.text
                 link = link.absolute_links
                 linkStr = "".join(link)
+                pattern = '_\w\w\w=\d{6}'
+                replace = ''
+                linkStr = re.sub(pattern, replace, linkStr)
                 if linkStr not in articles.keys():
                     articles[linkStr] = title
                     sendEmail(index, title, linkStr)
