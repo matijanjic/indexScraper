@@ -18,7 +18,7 @@ context = ssl.create_default_context()
 
 password = ''
 
-def sendEmail(index, title, link):
+def sendEmail(index, title, link, password):
 
     timestamp = datetime.datetime.now()
     dateTime = timestamp.strftime("%x %X")
@@ -110,7 +110,7 @@ def main():
                     linkStr = re.sub(pattern, replace, linkStr)
                     if linkStr not in articles.keys():
                         articles[linkStr] = title.text
-                        sendEmail(index, title.text, linkStr)
+                        sendEmail(index, title.text, linkStr, password)
                         index += 1
 
         # checks the side container
@@ -136,7 +136,7 @@ def main():
                 linkStr = re.sub(pattern, replace, linkStr)
                 if linkStr not in articles.keys():
                     articles[linkStr] = title
-                    sendEmail(index, title, linkStr)
+                    sendEmail(index, title, linkStr, password)
                     index += 1
 
         # add the option to stop the program remotely via email containing the word stop
