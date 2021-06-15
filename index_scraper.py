@@ -16,13 +16,14 @@ port = 465
 # Create a secure SSL context
 context = ssl.create_default_context()
 
+password = ''
 
 def sendEmail(index, title, link):
 
     timestamp = datetime.datetime.now()
     dateTime = timestamp.strftime("%x %X")
     message = "Subject: No. " + \
-        str(index) + ": " + title[:70] + "\n\n" + \
+        str(index) + ": " + title[:100] + "\n\n" + \
         dateTime + "\n" + title + "\n" + link
     print(message)
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
