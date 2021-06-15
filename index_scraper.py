@@ -6,8 +6,8 @@ import ssl
 from imbox import Imbox
 import re
 
-# e-mail info for the bot - need to hide the password eventually, this is just for the testing purposes
-password = "indexbot123"
+# e-mail info for the bot
+
 sender_email = "botzaindex@gmail.com"
 receiver_email = "matijanjic@gmail.com"
 
@@ -31,6 +31,8 @@ def sendEmail(index, title, link):
             sender_email, receiver_email, message.encode("utf8"))
 
 def main():
+
+    password = input("Type your password and press enter: ")
 
     # empty dictionary that will hold the article links(k) and titles(v)
     articles = {}
@@ -152,7 +154,6 @@ def main():
                     exit()
 
         time.sleep(30)
-
 
 if __name__ == '__main__':
     main()
