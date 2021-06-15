@@ -54,7 +54,7 @@ def main():
             link = link.absolute_links
             if title != None and "/tag/" not in link:
                 linkStr = "".join(link)
-                pattern = '_\w\w\w=\d{6}'
+                pattern = '(\?index)?(\?|&)index_(t|v)\w\w=\d{4,6}'
                 replace = ''
                 linkStr = re.sub(pattern, replace, linkStr)
                 # after that, link and title are added to the articles dictionary
@@ -79,7 +79,7 @@ def main():
             title = link.text
             link = link.absolute_links
             linkStr = "".join(link)
-            pattern = '_\w\w\w=\d{6}'
+            pattern = '(\?index)?(\?|&)index_(t|v)\w\w=\d{4,6}'
             replace = ''
             linkStr = re.sub(pattern, replace, linkStr)
             # doesn't have the .text method as above since it already is a string type
@@ -102,7 +102,7 @@ def main():
                 link = link.absolute_links
                 if title != None and "/tag/" not in link:
                     linkStr = "".join(link)
-                    pattern = '_\w\w\w=\d{6}'
+                    pattern = '(\?index)?(\?|&)index_(t|v)\w\w=\d{4,6}'
                     replace = ''
                     linkStr = re.sub(pattern, replace, linkStr)
                     if linkStr not in articles.keys():
@@ -128,7 +128,7 @@ def main():
                 title = link.text
                 link = link.absolute_links
                 linkStr = "".join(link)
-                pattern = '_\w\w\w=\d{6}'
+                pattern = '(\?index)?(\?|&)index_(t|v)\w\w=\d{4,6}'
                 replace = ''
                 linkStr = re.sub(pattern, replace, linkStr)
                 if linkStr not in articles.keys():
