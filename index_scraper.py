@@ -38,7 +38,7 @@ def main():
     # empty dictionary that will hold the article links(k) and titles(v)
     articles = {}
 
-    # select the categories on the Index.hr page - 0 is news, 1 is sports and 2 is lifestyle
+    # select the categories on the Index.hr page - 0 is news, 1 is sports and 2 is lifestyle (for example [0, 2] for news and lifestyle)
     categories = [0]
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'}
