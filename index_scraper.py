@@ -19,6 +19,8 @@ context = ssl.create_default_context()
 
 password = ''
 
+# function for sending e-mails
+
 def sendEmail(index, title, link, password):
 
     timestamp = datetime.datetime.now()
@@ -28,7 +30,7 @@ def sendEmail(index, title, link, password):
         dateTime + "\n" + title + "\n" + link
     print(message)
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-        server.login("botzaindex@gmail.com", password)
+        server.login(sender_email, password)
         server.sendmail(
             sender_email, receiver_email, message.encode("utf8"))
 
@@ -154,7 +156,7 @@ def main():
                 if 'STOP' in str(message.body['plain']).upper():
                     imbox.mark_seen(uid)
                     exit()
-
+        # timeout between searches
         time.sleep(30)
 
 if __name__ == '__main__':
